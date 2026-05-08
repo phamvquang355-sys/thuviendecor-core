@@ -4,6 +4,7 @@ import React, { useState } from 'react'
 import Link from 'next/link'
 import { login } from '@/src/app/auth/actions'
 import { Button } from '@/components/ui/button'
+import { APP_ROUTES } from '@/lib/constants/routes'
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null)
@@ -16,14 +17,16 @@ export default function LoginPage() {
     if (result?.error) {
       setError(result.error)
       setIsLoading(false)
+      return
     }
+    window.location.href = APP_ROUTES.home
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-950 px-4">
       <div className="w-full max-w-md p-8 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl">
         <div className="text-center mb-8">
-          <Link href="/" className="text-3xl font-black tracking-widest text-white hover:text-accent-gold transition-colors inline-block mb-2">
+          <Link href={APP_ROUTES.home} className="text-3xl font-black tracking-widest text-white hover:text-accent-gold transition-colors inline-block mb-2">
             DULI
           </Link>
           <h1 className="text-2xl font-bold text-gray-100">Đăng nhập hệ thống</h1>
@@ -78,7 +81,7 @@ export default function LoginPage() {
 
         <div className="mt-8 text-center text-sm text-gray-400">
           Chưa có tài khoản?{' '}
-          <Link href="/register" className="text-accent-gold hover:underline font-semibold">
+          <Link href={APP_ROUTES.register} className="text-accent-gold hover:underline font-semibold">
             Đăng ký ngay
           </Link>
         </div>

@@ -12,11 +12,13 @@ DROP TABLE IF EXISTS public.profiles CASCADE;
 DROP TYPE IF EXISTS public.resource_category CASCADE;
 DROP TYPE IF EXISTS public.transaction_type CASCADE;
 DROP TYPE IF EXISTS public.transaction_status CASCADE;
+DROP TYPE IF EXISTS public.user_role CASCADE;
 
 -- 3. Tạo kiểu dữ liệu Enum
 CREATE TYPE public.resource_category AS ENUM ('3D', '2D', 'PNG');
 CREATE TYPE public.transaction_type AS ENUM ('purchase', 'topup');
 CREATE TYPE public.transaction_status AS ENUM ('pending', 'completed', 'failed', 'cancelled');
+CREATE TYPE public.user_role AS ENUM ('USER', 'ADMIN', 'EDITOR');
 
 -- ==============================================================================
 -- BẢNG DỮ LIỆU (TABLES) - TẠO THEO THỨ TỰ ĐỂ TRÁNH LỖI "RELATION DOES NOT EXIST"
@@ -26,6 +28,7 @@ CREATE TYPE public.transaction_status AS ENUM ('pending', 'completed', 'failed',
 CREATE TABLE public.profiles (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     credits INTEGER NOT NULL DEFAULT 0,
+    role public.user_role NOT NULL DEFAULT 'USER',
     created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
@@ -87,3 +90,32 @@ CREATE POLICY "Users có thể xem profile của chính họ" ON public.profiles
 CREATE POLICY "Users có thể xem lịch sử giao dịch của chính họ" ON public.transactions FOR SELECT USING (auth.uid() = profile_id);
 
 -- Lưu ý: Khi có giao dịch topup hoặc purchase, Service Role sẽ thực hiện INSERT/UPDATE (vượt qua RLS).
+
+-- ==============================================================================
+-- DATABASE FUNCTIONS (RPC)
+-- ==============================================================================
+
+-- Hàm RPC dùng cho Webhook PayOS cộng tiền vào tài khoản
+CREATE OR REPLACE FUNCTION public.increment_credits(user_id UUID, amount INTEGER)
+RETURNS void AS $$
+BEGIN
+  UPDATE public.profiles
+  SET credits = credits + amount
+  WHERE id = user_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- View cho Admin quản lý người dùng
+CREATE OR REPLACE VIEW public.admin_user_view AS
+SELECT 
+    p.id, 
+    u.email, 
+    p.credits, 
+    p.role, 
+    p.created_at
+FROM public.profiles p
+JOIN auth.users u ON p.id = u.id;
+
+-- Phân quyền cho view (chỉ cho phép truy cập qua Service Role)
+GRANT SELECT ON public.admin_user_view TO service_role;
+REVOKE ALL ON public.admin_user_view FROM anon, authenticated;

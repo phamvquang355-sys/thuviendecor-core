@@ -13,19 +13,22 @@ export interface Database {
         Row: {
           id: string
           credits: number
+          role: 'USER' | 'ADMIN' | 'EDITOR'
           created_at: string
         }
         Insert: {
           id: string
           credits?: number
+          role?: 'USER' | 'ADMIN' | 'EDITOR'
           created_at?: string
         }
         Update: {
           id?: string
           credits?: number
+          role?: 'USER' | 'ADMIN' | 'EDITOR'
           created_at?: string
         }
-        Relationships: any[]
+        Relationships: never[]
       }
       resources: {
         Row: {
@@ -58,7 +61,7 @@ export interface Database {
           download_url?: string | null
           created_at?: string
         }
-        Relationships: any[]
+        Relationships: never[]
       }
       posts: {
         Row: {
@@ -88,7 +91,7 @@ export interface Database {
           meta_description?: string | null
           created_at?: string
         }
-        Relationships: any[]
+        Relationships: never[]
       }
       transactions: {
         Row: {
@@ -97,7 +100,7 @@ export interface Database {
           resource_id: string | null
           amount: number
           type: 'purchase' | 'topup'
-          status: 'pending' | 'completed' | 'failed'
+          status: 'pending' | 'completed' | 'failed' | 'cancelled'
           reference_code: string | null
           created_at: string
         }
@@ -107,7 +110,7 @@ export interface Database {
           resource_id?: string | null
           amount: number
           type: 'purchase' | 'topup'
-          status?: 'pending' | 'completed' | 'failed'
+          status?: 'pending' | 'completed' | 'failed' | 'cancelled'
           reference_code?: string | null
           created_at?: string
         }
@@ -117,22 +120,41 @@ export interface Database {
           resource_id?: string | null
           amount?: number
           type?: 'purchase' | 'topup'
-          status?: 'pending' | 'completed' | 'failed'
+          status?: 'pending' | 'completed' | 'failed' | 'cancelled'
           reference_code?: string | null
           created_at?: string
         }
-        Relationships: any[]
+        Relationships: never[]
       }
     }
     Views: {
-      [key: string]: never
+      admin_user_view: {
+        Row: {
+          id: string
+          email: string
+          credits: number
+          role: 'USER' | 'ADMIN' | 'EDITOR'
+          created_at: string
+        }
+        Insert: never
+        Update: never
+        Relationships: never[]
+      }
     }
     Functions: {
-      [key: string]: never
+      increment_credits: {
+        Args: {
+          user_id: string
+          amount: number
+        }
+        Returns: void
+      }
     }
     Enums: {
       resource_category: '3D' | '2D' | 'PNG'
       transaction_type: 'purchase' | 'topup'
+      transaction_status: 'pending' | 'completed' | 'failed' | 'cancelled'
+      user_role: 'USER' | 'ADMIN' | 'EDITOR'
     }
     CompositeTypes: {
       [key: string]: never

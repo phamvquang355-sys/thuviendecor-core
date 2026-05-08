@@ -16,7 +16,7 @@ export async function updateSession(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => request.cookies.set(name, value))
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,
           })
@@ -43,11 +43,33 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Nếu chưa đăng nhập mà cố vào trang bảo mật (VD: /topup) -> redirect về login
-  const isProtectedRoute = request.nextUrl.pathname.startsWith('/topup')
+  const isProtectedRoute = request.nextUrl.pathname.startsWith('/napcredit')
   if (!user && isProtectedRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
+  }
+
+  // Bảo vệ route /admin
+  if (request.nextUrl.pathname.startsWith('/admin')) {
+    if (!user) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/login'
+      return NextResponse.redirect(url)
+    }
+
+    // Lấy role của user
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    if (!profile || (profile.role !== 'ADMIN' && profile.role !== 'EDITOR')) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/' // Redirect về trang chủ nếu không có quyền
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

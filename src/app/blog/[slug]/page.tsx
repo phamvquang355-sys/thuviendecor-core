@@ -1,6 +1,7 @@
 import React from 'react'
 import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
+import Image from 'next/image'
 
 export const revalidate = 3600 // Cache for 1 hour
 
@@ -57,9 +58,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
         </h1>
         {post.thumbnail && (
           <div className="mt-8 rounded-2xl overflow-hidden shadow-lg w-full aspect-video bg-gray-100 relative">
-            <img 
+            <Image
               src={post.thumbnail} 
               alt={post.title} 
+              fill
               className="w-full h-full object-cover"
             />
           </div>

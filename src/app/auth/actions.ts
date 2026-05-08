@@ -1,8 +1,8 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { APP_ROUTES } from '@/lib/constants/routes'
 import { z } from 'zod'
 
 // Định nghĩa khung kiểm tra dữ liệu đầu vào
@@ -36,8 +36,8 @@ export async function login(formData: FormData) {
     return { error: 'Email hoặc mật khẩu không chính xác.' }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  revalidatePath(APP_ROUTES.home, 'layout')
+  return { success: true }
 }
 
 export async function signup(formData: FormData) {
@@ -66,8 +66,8 @@ export async function signup(formData: FormData) {
     return { error: error.message }
   }
 
-  revalidatePath('/', 'layout')
-  redirect('/')
+  revalidatePath(APP_ROUTES.home, 'layout')
+  return { success: true }
 }
 
 export async function logout() {
@@ -75,7 +75,6 @@ export async function logout() {
 
   await supabase.auth.signOut()
 
-  revalidatePath('/', 'layout')
-  // Chuyển hướng về trang chủ sau khi đăng xuất để tránh lỗi treo session
-  redirect('/')
+  revalidatePath(APP_ROUTES.home, 'layout')
+  return { success: true }
 }

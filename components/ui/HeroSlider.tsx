@@ -8,11 +8,11 @@ import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const HERO_SLIDES = [
-  { id: 1, url: '/images/hero/slide-1.jpg', alt: 'Tiệc cưới ngoài trời lãng mạn' },
-  { id: 2, url: '/images/hero/slide-2.jpg', alt: 'Kiến trúc sân khấu sự kiện' },
-  { id: 3, url: '/images/hero/slide-3.jpg', alt: 'Trang trí bàn tiệc sang trọng' },
-  { id: 4, url: '/images/hero/slide-4.jpg', alt: 'Không gian tiệc cưới cổ điển' },
-  { id: 5, url: '/images/hero/slide-5.jpg', alt: 'Ánh sáng sự kiện' }
+  { id: 1, url: '/image/hero/slide-1.jpg', alt: 'Tiệc cưới ngoài trời lãng mạn' },
+  { id: 2, url: '/image/hero/slide-2.jpg', alt: 'Kiến trúc sân khấu sự kiện' },
+  { id: 3, url: '/image/hero/slide-3.jpg', alt: 'Trang trí bàn tiệc sang trọng' },
+  { id: 4, url: '/image/hero/slide-4.jpg', alt: 'Không gian tiệc cưới cổ điển' },
+  { id: 5, url: '/image/hero/slide-5.jpg', alt: 'Ánh sáng sự kiện' }
 ]
 
 export function HeroSlider() {
