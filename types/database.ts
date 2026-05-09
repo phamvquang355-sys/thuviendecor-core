@@ -63,6 +63,33 @@ export interface Database {
         }
         Relationships: never[]
       }
+      hero_slides: {
+        Row: {
+          id: string
+          image_url: string
+          alt_text: string | null
+          display_order: number
+          is_active: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          image_url: string
+          alt_text?: string | null
+          display_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          image_url?: string
+          alt_text?: string | null
+          display_order?: number
+          is_active?: boolean
+          created_at?: string
+        }
+        Relationships: never[]
+      }
       posts: {
         Row: {
           id: string

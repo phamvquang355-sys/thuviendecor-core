@@ -9,11 +9,12 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 interface HeroSlide {
-  id: number | string
-  url?: string
-  image_url?: string
-  alt?: string
-  title?: string
+  id: string
+  image_url: string
+  alt_text: string | null
+  display_order: number
+  is_active: boolean
+  created_at: string
 }
 
 export function HeroSlider() {
@@ -31,7 +32,8 @@ export function HeroSlider() {
       const { data, error } = await supabase
         .from('hero_slides')
         .select('*')
-        .order('id', { ascending: true })
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
 
       if (error) {
         console.error('Error fetching hero slides:', error)
@@ -71,9 +73,10 @@ export function HeroSlider() {
           {slides.map((slide, index) => (
             <div className="relative flex-[0_0_100%] min-w-0" key={slide.id}>
               <Image
-                src={slide.url || slide.image_url || ''}
-                alt={slide.alt || slide.title || 'Hero slide'}
+                src={slide.image_url}
+                alt={slide.alt_text || 'Hero slide'}
                 fill
+                unoptimized
                 priority={index === 0}
                 className="object-cover"
                 sizes="(max-width: 1200px) 100vw, 1200px"

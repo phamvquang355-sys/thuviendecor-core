@@ -119,3 +119,24 @@ JOIN auth.users u ON p.id = u.id;
 -- Phân quyền cho view (chỉ cho phép truy cập qua Service Role)
 GRANT SELECT ON public.admin_user_view TO service_role;
 REVOKE ALL ON public.admin_user_view FROM anon, authenticated;
+
+-- ==============================================================================
+-- BẢNG 5: hero_slides (Quản lý ảnh slider)
+-- ==============================================================================
+CREATE TABLE public.hero_slides (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    image_url TEXT NOT NULL,
+    alt_text TEXT,
+    display_order INTEGER NOT NULL DEFAULT 0,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT timezone('utc'::text, now()) NOT NULL
+);
+
+ALTER TABLE public.hero_slides ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Cho phép mọi người xem hero slides" ON public.hero_slides FOR SELECT USING (true);
+
+CREATE POLICY "Cho phép ADMIN quản lý hero slides" ON public.hero_slides FOR ALL USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE profiles.id = auth.uid() AND profiles.role = 'ADMIN')
+);
+
