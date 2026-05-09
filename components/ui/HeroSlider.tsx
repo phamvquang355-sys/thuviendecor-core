@@ -1,25 +1,48 @@
 "use client"
 
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
-const HERO_SLIDES = [
-  { id: 1, url: '/image/hero/slide-1.jpg', alt: 'Tiệc cưới ngoài trời lãng mạn' },
-  { id: 2, url: '/image/hero/slide-2.jpg', alt: 'Kiến trúc sân khấu sự kiện' },
-  { id: 3, url: '/image/hero/slide-3.jpg', alt: 'Trang trí bàn tiệc sang trọng' },
-  { id: 4, url: '/image/hero/slide-4.jpg', alt: 'Không gian tiệc cưới cổ điển' },
-  { id: 5, url: '/image/hero/slide-5.jpg', alt: 'Ánh sáng sự kiện' }
-]
+interface HeroSlide {
+  id: number | string
+  url?: string
+  image_url?: string
+  alt?: string
+  title?: string
+}
 
 export function HeroSlider() {
+  const [slides, setSlides] = useState<HeroSlide[]>([])
+  const [loading, setLoading] = useState(true)
+
   const [emblaRef, emblaApi] = useEmblaCarousel(
     { loop: true },
     [Autoplay({ delay: 5000, stopOnInteraction: false })]
   )
+
+  useEffect(() => {
+    async function fetchSlides() {
+      const supabase = createClient()
+      const { data, error } = await supabase
+        .from('hero_slides')
+        .select('*')
+        .order('id', { ascending: true })
+
+      if (error) {
+        console.error('Error fetching hero slides:', error)
+      } else if (data && data.length > 0) {
+        setSlides(data)
+      }
+      setLoading(false)
+    }
+
+    fetchSlides()
+  }, [])
 
   const scrollPrev = useCallback(() => {
     if (emblaApi) emblaApi.scrollPrev()
@@ -29,16 +52,27 @@ export function HeroSlider() {
     if (emblaApi) emblaApi.scrollNext()
   }, [emblaApi])
 
+  if (loading) {
+    return (
+      <div className="relative w-full max-w-7xl mx-auto md:py-8">
+        <div className="overflow-hidden md:rounded-2xl shadow-2xl relative h-[70vh] min-h-[500px] bg-gray-100 animate-pulse">
+        </div>
+      </div>
+    )
+  }
+
+  if (slides.length === 0) return null
+
   return (
     <div className="relative w-full max-w-7xl mx-auto md:py-8">
       {/* Slider Viewport */}
       <div className="overflow-hidden md:rounded-2xl shadow-2xl relative" ref={emblaRef}>
         <div className="flex h-[70vh] min-h-[500px]">
-          {HERO_SLIDES.map((slide, index) => (
+          {slides.map((slide, index) => (
             <div className="relative flex-[0_0_100%] min-w-0" key={slide.id}>
               <Image
-                src={slide.url}
-                alt={slide.alt}
+                src={slide.url || slide.image_url || ''}
+                alt={slide.alt || slide.title || 'Hero slide'}
                 fill
                 priority={index === 0}
                 className="object-cover"
